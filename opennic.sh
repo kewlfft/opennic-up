@@ -27,7 +27,7 @@ if [ "x$apihost" == "x" ]; then
 fi
 echo "Using $apihost as API host"
 
-# record my IP in whitelist if my account parameters have been passed: userid and keyid
+# record my IP in whitelist if my account login parameters have been passed: userid and keyid
 if [ $# -eq 2 ]; then
     curl --resolve "api.opennicproject.org:443:$apihost" "https://api.opennicproject.org/ip/update/?user=$1&auth=$2"
 fi
@@ -38,14 +38,13 @@ echo $apiurl
 hosts=$(curl --silent --resolve "api.opennicproject.org:443:$apihost" $apiurl)
 
 # filter hosts with more than 90% reliability
-myhosts=$(echo "$hosts" | awk -F# '$3 + 0.0 > 90' | awk -F# '{print $1}')
-myhostscount=$(echo "$myhosts" | wc -l)
+allhosts=$(echo "$hosts" | awk -F# '$3 + 0.0 > 90' | awk -F# '{print $1}')
+allhostscount=$(echo "$allhosts" | wc -l)
 
-if [ "$myhostscount" -ge 2 ]; then
-
+if [ "$allhostscount" -ge 2 ]; then
   #pinging the hosts
-  echo "Pinging $myhostscount hosts to determine the top ones..."
-  pingresults=$(multiping $myhosts)
+  echo "Pinging $allhostscount hosts to determine the top ones..."
+  pingresults=$(multiping $allhosts)
 
   # We throw away servers that fall below the average packet loss of all servers
   # Illustration of packet loss filter:
@@ -60,15 +59,15 @@ if [ "$myhostscount" -ge 2 ]; then
   echo "Resulting in $hostscount responsive hosts"
 
   # we retain the top 3 servers for our DNS and keep only the IP column
-  hostsshortlist=$(echo "$hosts" | head -n 3 | awk '{print $1}')
-  echo $hostsshortlist
+  myhosts=$(echo "$hosts" | head -n 3 | awk '{print $1}')
+  echo $myhosts
 
   # replace Network Manager DNS with the new ones for all active connections
   if [ "$hostscount" -ge 2 ]; then
     for id in $(nmcli -terse -fields UUID connection show --active)
     do
       currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
-      if [ "$(echo "$currentdnss" | sort)" == "$(echo "$hostsshortlist" | sort)" ]
+      if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]
       then
           echo "No dns change"
       else
@@ -78,7 +77,7 @@ if [ "$myhostscount" -ge 2 ]; then
             nmcli connection modify $id -ipv4.dns $dns
           done
 
-          for dns in $hostsshortlist
+          for dns in $myhosts
           do
             nmcli connection modify $id +ipv4.dns $dns
           done
