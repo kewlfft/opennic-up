@@ -25,7 +25,7 @@ if [ "x$apihost" == "x" ]; then
   echo "API IP not found, using default"
   apihost="161.97.219.82"
 fi
-echo "Using $apihost as API host" 1>&2
+echo "Using $apihost as API host"
 
 # record my IP in whitelist if my account parameters have been passed: userid and keyid
 if [ $# -eq 2 ]; then
@@ -44,7 +44,7 @@ myhostscount=$(echo "$myhosts" | wc -l)
 if [ "$myhostscount" -ge 2 ]; then
 
   #pinging the hosts
-  echo "Pinging $myhostscount hosts to determine the top ones..." 1>&2
+  echo "Pinging $myhostscount hosts to determine the top ones..."
   pingresults=$(multiping $myhosts)
 
   # We throw away servers that fall below the average packet loss of all servers
@@ -61,7 +61,7 @@ if [ "$myhostscount" -ge 2 ]; then
 
   # we retain the top 3 servers for our DNS and keep only the IP column
   hostsshortlist=$(echo "$hosts" | head -n 3 | awk '{print $1}')
-  echo "$hostsshortlist"
+  echo $hostsshortlist
 
   # replace Network Manager DNS with the new ones for all active connections
   if [ "$hostscount" -ge 2 ]; then
@@ -87,9 +87,9 @@ if [ "$myhostscount" -ge 2 ]; then
       fi
     done
   else
-    echo "Not enough responsive OpenNIC servers available"
+    echo "Not enough responsive OpenNIC servers available" 1>&2
   fi
 
 else
-  echo "Not enough OpenNIC servers available"
+  echo "Not enough OpenNIC servers available" 1>&2
 fi
