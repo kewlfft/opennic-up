@@ -1,6 +1,6 @@
 # nm-opennic
 
-**OpenNIC auto dns updater using network manager**
+**OpenNIC auto dns updater using Network Manager**
 
 syntax:
 
