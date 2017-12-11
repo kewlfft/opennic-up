@@ -2,12 +2,12 @@
 
 # pings run in parallel
 multiping() {
-    fping -q -p 20 -r 0 -c 25 "$@" 2>&1
+  fping -q -p 20 -r 0 -c 25 "$@" 2>&1
 }
 
 # dns lookup using google 8.8.8.8
 dnslookup() {
-    drill A api.opennicproject.org @8.8.8.8 | awk '$1 == "api.opennicproject.org." && $3 == "IN" && $4 == "A" {print $5}'
+  drill A api.opennicproject.org @8.8.8.8 | awk '$1 == "api.opennicproject.org." && $3 == "IN" && $4 == "A" {print $5}'
 }
 
 # check needed packages are present
@@ -18,13 +18,9 @@ for needed_single in $needed; do
 	exit 1
 done
 
-# find out what the IP address of api.opennicproject.org is
+# find out what the IP address of api.opennicproject.org is, fallback static IP address configured
 apihost=$(dnslookup)
-if [ "x$apihost" == "x" ]; then
-  # our fallback is to have a static IP address configured of api.opennicproject.org
-  echo "API IP not found, using default"
-  apihost="161.97.219.82"
-fi
+apihost=${apihost:-"161.97.219.82"}
 echo "Using $apihost as API host"
 
 # record my IP in whitelist if my account login parameters have been passed: userid and keyid
