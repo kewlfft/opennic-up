@@ -14,7 +14,7 @@ dnslookup() {
 needed="awk sort uniq curl fping xargs drill"
 for needed_single in $needed; do
 	which "$needed_single" > /dev/null 2> /dev/null && continue
-	echo "$needed_single (a necessary tool used by this script) is not installed on this computer or has not been found in your environment paths ($PATH)" 1>&2
+	echo "$needed_single: is required, it is not installed or has not been found in your environment paths" 1>&2
 	exit 1
 done
 
