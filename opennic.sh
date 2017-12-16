@@ -31,47 +31,46 @@ fi
 # query the API for 200 sites
 apiurl="https://api.opennicproject.org/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 echo $apiurl
-hosts=$(curl --silent --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" $apiurl)
+allhosts=$(curl --silent --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" $apiurl)
 
-if [ -z "$hosts" ]; then
+if [ -z "$allhosts" ]; then
   echo "API not available" 1>&2
   exit 1
 fi
 
 # filter hosts with more than 90% reliability
-allhosts=$(echo "$hosts" | awk -F# '$3 + 0.0 > 90' | awk -F# '{print $1}')
-allhostscount=$(echo "$allhosts" | wc -l)
+reliable=$(echo "$allhosts" | awk -F# '$3 + 0.0 > 90' | awk -F# '{print $1}')
+reliablecount=$(echo "$reliable" | wc -l)
 
-if [ "$allhostscount" -ge 2 ]; then
+if [ "$reliablecount" -ge 2 ]; then
   #pinging the hosts
-  echo "Pinging $allhostscount hosts to determine the top ones..."
-  pingresults=$(multiping $allhosts)
+  echo "Pinging $reliablecount hosts to determine the top ones..."
+  pingresults=$(multiping $reliable)
 
   # we apply the packet loss filter and also sort the servers by their average response time and keep only the IP column
-  hosts=$(echo "$pingresults" | awk -F/ '$5 + 0.0 < 10' | sort -t/ -nk8 | awk '{print $1}')
-  hostscount=$(echo "$hosts" | wc -l)
-  echo "Resulting in $hostscount responsive hosts"
+  responsive=$(echo "$pingresults" | awk -F/ '$5 + 0.0 < 10' | sort -t/ -nk8 | awk '{print $1}')
+  responsivecount=$(echo "$responsive" | wc -l)
+  echo "Resulting in $responsivecount responsive hosts"
 
   # replace Network Manager DNS with the new ones for all active connections
-  if [ "$hostscount" -ge 2 ]; then
+  if [ "$responsivecount" -ge 2 ]; then
     # we retain the top 3 servers for our DNS
-    myhosts=$(echo "$hosts" | head -n 3)
-    echo $myhosts
+    myhosts=$(echo "$responsive" | head -n 3)
+    for dns in $myhosts; do
+      echo "$allhosts" | grep $dns
+    done
 
-    for id in $(nmcli -terse -fields UUID connection show --active)
-    do
+    for id in $(nmcli -terse -fields UUID connection show --active); do
       currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
       if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
           echo "No dns change"
       else
           #statements
-          for dns in $currentdnss
-          do
+          for dns in $currentdnss; do
             nmcli connection modify $id -ipv4.dns $dns
           done
 
-          for dns in $myhosts
-          do
+          for dns in $myhosts; do
             nmcli connection modify $id +ipv4.dns $dns
           done
           echo "Updating $id"
