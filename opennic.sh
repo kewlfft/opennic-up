@@ -23,7 +23,7 @@ apihost=$(dnslookup)
 apihost=${apihost:-"161.97.219.82"}
 echo "Using $apihost as API host"
 
-# record my IP in whitelist if my account login parameters have been passed: userid and keyid
+# record my IP in whitelist if my account login parameters have been passed [userid] and [keyid]
 if [ $# -eq 2 ]; then
     curl --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" "https://api.opennicproject.org/ip/update/?user=$1&auth=$2"
 fi
