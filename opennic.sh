@@ -25,16 +25,16 @@ echo "Using $apihost as API host"
 
 # record my IP in whitelist if my account login parameters have been passed [userid] and [keyid]
 if [ $# -eq 2 ]; then
-    curl --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" "https://api.opennicproject.org/ip/update/?user=$1&auth=$2"
+  curl --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" "https://api.opennicproject.org/ip/update/?user=$1&auth=$2"
 fi
 
 # query the API for 200 sites
-apiurl="https://api.opennicproject.org/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
+apiurl='https://api.opennicproject.org/geoip/?list&ipv=4&res=200&adm=0&bl&wl'
 echo $apiurl
 allhosts=$(curl --silent --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" $apiurl)
 
 if [ -z "$allhosts" ]; then
-  echo "API not available" 1>&2
+  echo 'API not available' 1>&2
   exit 1
 fi
 
@@ -63,7 +63,7 @@ if [ "$reliablecount" -ge 2 ]; then
     for id in $(nmcli -terse -fields UUID connection show --active); do
       currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
       if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
-          echo "No dns change"
+          echo 'No dns change'
       else
           #statements
           for dns in $currentdnss; do
@@ -78,9 +78,9 @@ if [ "$reliablecount" -ge 2 ]; then
       fi
     done
   else
-    echo "Not enough responsive OpenNIC servers available" 1>&2
+    echo 'Not enough responsive OpenNIC servers available' 1>&2
   fi
 
 else
-  echo "Not enough OpenNIC servers available" 1>&2
+  echo 'Not enough OpenNIC servers available' 1>&2
 fi
