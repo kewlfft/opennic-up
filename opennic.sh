@@ -18,6 +18,9 @@ for needed_single in $needed; do
 	exit 1
 done
 
+# wait for internet 20s*4
+fping -q -t 20000 8.8.8.8
+
 # find out what the IP address of api.opennicproject.org is, fallback static IP address configured
 apihost=$(dnslookup)
 apihost=${apihost:-"161.97.219.82"}
