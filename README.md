@@ -4,7 +4,7 @@
 
 ## Syntax
 
-opennic
+`# opennic-up`
 
 Replaces the Network Manager's dns servers with the 3 most responsive OpenNIC dns servers for your location. _resolv.conf_ is also updated for immediate implementation of the new dns entries.
 
