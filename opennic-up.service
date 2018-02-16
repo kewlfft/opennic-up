@@ -1,0 +1,7 @@
+[Unit]
+Description=opennic-up DNS update
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/opennic
