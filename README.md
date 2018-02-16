@@ -17,5 +17,6 @@ The file contains two lines defining *user* and *auth* for the member and are us
 
 `
 user=myusername
+
 auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
 `
