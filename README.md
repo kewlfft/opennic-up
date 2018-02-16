@@ -1,4 +1,4 @@
-# nm-opennic
+# opennic-up
 
 **OpenNIC auto dns updater using Network Manager**
 
