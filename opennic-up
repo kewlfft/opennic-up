@@ -29,13 +29,12 @@ echo "Using $apiip as API host"
 
 # record my IP in whitelist if my account login parameters have been passed [userid] and [keyid]
 configpathlist=(/etc ~/.config/opennic-up)
-
 for p in "${configpathlist[@]}"; do
   configfile=$p/opennic-up.conf
   if [ -r $configfile ]; then
     . $configfile
     if [ -n "$user" ] && [ -n "$auth" ]; then 
-      echo "Recording IP for user: $userid"
+      echo "Recording IP for user: $user"
       curl --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
     fi
   fi
