@@ -5,7 +5,12 @@
 ## Installation
 
 The `opennic-up` Bash script can be downloaded to your preferred location.
+
 For a full integration of the automated update process with you system and with systemd, an **Arch Linux** package is available [here][1].
+To enable and start the systemd timer that will update the DNS twice a week, use:
+```
+$ systemctl enable --now opennic-up.timer
+```
 
 ## Syntax
 
