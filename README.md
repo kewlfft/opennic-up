@@ -24,7 +24,7 @@ Replaces the Network Manager's DNS servers with the 3 most responsive [OpenNIC][
 
 *opennic-up* looks for the file at the location `/etc/opennic-up.conf`. Alternatively it can be saved in the user location `~/.config/opennic-up/opennic-up.conf` and in this case it takes precedence over the former.
 
-The file contains two lines defining the OpenNIC [member][3]'s **user** and **auth** used to register one's IP for [whitelisting][4]. For example:
+The file defines the OpenNIC [member][3]'s **user** and **auth** used to register one's IP for [whitelisting][4]. For example:
 ```
 user=myusername
 auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
