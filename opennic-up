@@ -5,7 +5,7 @@ multiping() {
   fping -q -p 20 -r 0 -c 25 "$@" 2>&1
 }
 
-# dns lookup
+# dns lookup nameserver hostname
 dnslookup() {
   drill A $2 @$1 | awk '$1 == "'"$2"'." && $3 == "IN" && $4 == "A" {print $5}'
 }
