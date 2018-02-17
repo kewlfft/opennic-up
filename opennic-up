@@ -34,7 +34,7 @@ for p in "${configpathlist[@]}"; do
   if [ -r $configfile ]; then
     . $configfile
     if [ -n "$user" ] && [ -n "$auth" ]; then 
-      echo "Recording IP for user: $user"
+      echo "Updating IP for user: $user"
       curl --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
     fi
   fi
