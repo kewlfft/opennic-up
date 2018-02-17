@@ -1,6 +1,6 @@
 # opennic-up
 
-**OpenNIC auto DNS updater using Network Manager**
+**OpenNIC auto DNS updater for Network Manager**
 
 ## Syntax
 
