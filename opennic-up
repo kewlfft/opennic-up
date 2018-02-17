@@ -42,7 +42,7 @@ for p in "${configpathlist[@]}"; do
   fi
 done
 
-# query the API for 200 sites
+# query the API, list format, ipv4, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
 apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 echo $apiurl
 allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" $apiurl)
