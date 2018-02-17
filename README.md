@@ -1,12 +1,12 @@
 # opennic-up
 
-**OpenNIC auto dns updater using Network Manager**
+**OpenNIC auto DNS updater using Network Manager**
 
 ## Syntax
 
 `# opennic-up`
 
-Replaces the Network Manager's DNS servers with the 3 most responsive [OpenNIC][0] dns servers for your location. `resolv.conf` is also updated for immediate implementation of the new dns entries.
+Replaces the Network Manager's DNS servers with the 3 most responsive [OpenNIC][0] DNS servers for your location. `resolv.conf` is also updated for immediate implementation of the new DNS entries.
 
 ## Configuration
 
