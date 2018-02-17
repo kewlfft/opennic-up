@@ -7,7 +7,7 @@ multiping() {
 
 # dns lookup using google 8.8.8.8
 dnslookup() {
-  drill A api.opennicproject.org @8.8.8.8 | awk '$1 == "api.opennicproject.org." && $3 == "IN" && $4 == "A" {print $5}'
+  drill A $1 @8.8.8.8 | awk '$1 == "'"$1"'." && $3 == "IN" && $4 == "A" {print $5}'
 }
 
 # check needed packages are present
@@ -22,9 +22,10 @@ done
 fping -q -t 20000 8.8.8.8
 
 # find out what the IP address of api.opennicproject.org is, fallback static IP address configured
-apihost=$(dnslookup)
-apihost=${apihost:-"161.97.219.82"}
-echo "Using $apihost as API host"
+apihost=api.opennicproject.org
+apiip=$(dnslookup "$apihost")
+apiip=${apiip:-"161.97.219.82"}
+echo "Using $apiip as API host"
 
 # record my IP in whitelist if my account login parameters have been passed [userid] and [keyid]
 configpathlist=(/etc ~/.config/opennic-up)
@@ -35,15 +36,15 @@ for p in "${configpathlist[@]}"; do
     . $configfile
     if [ -n "$userid" ] && [ -n "$userkey" ]; then 
       echo "Recording IP for user: $userid"
-      curl --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" "https://api.opennicproject.org/ip/update/?user=$user&auth=$auth"
+      curl --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
     fi
   fi
 done
 
 # query the API for 200 sites
-apiurl='https://api.opennicproject.org/geoip/?list&ipv=4&res=200&adm=0&bl&wl'
+apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 echo $apiurl
-allhosts=$(curl --silent --connect-timeout 60 --resolve "api.opennicproject.org:443:$apihost" $apiurl)
+allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" $apiurl)
 
 if [ -z "$allhosts" ]; then
   echo 'API not available' 1>&2
