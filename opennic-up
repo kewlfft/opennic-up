@@ -18,7 +18,8 @@ for needed_single in $needed; do
 	exit 1
 done
 
-# wait for internet 20s*4
+# wait for network up 20s*4
+echo 'Checking network is up'
 fping -q -t 20000 8.8.8.8
 
 # find out what the IP address of api.opennicproject.org is, fallback static IP address configured
@@ -64,10 +65,12 @@ if [ "$reliablecount" -ge 2 ]; then
   responsivecount=$(echo "$responsive" | wc -l)
   echo "Resulting in $responsivecount responsive hosts"
 
+  retain=3
   # replace Network Manager DNS with the new ones for all active connections
   if [ "$responsivecount" -ge 2 ]; then
-    # we retain the top 3 servers for our DNS
-    myhosts=$(echo "$responsive" | head -n 3)
+    # we retain the top servers for our DNS
+    echo "Selected top $retain hosts:"
+    myhosts=$(echo "$responsive" | head -n $retain)
     for dns in $myhosts; do
       echo "$allhosts" | grep $dns
     done
