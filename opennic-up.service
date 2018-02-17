@@ -4,4 +4,4 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/opennic
+ExecStart=/usr/bin/opennic-up
