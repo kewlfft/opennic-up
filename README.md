@@ -2,6 +2,11 @@
 
 **OpenNIC auto DNS updater for Network Manager**
 
+## Installation
+
+The `opennic-up` Bash script can be downloaded to your preferred location.
+For a full integration of the automated update process with you system and with systemd, an Arch Linux package is available [here][1].
+
 ## Syntax
 
 `# opennic-up`
@@ -19,10 +24,6 @@ The file contains two lines defining the OpenNIC [member][3]'s **user** and **au
 user=myusername
 auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
 ```
-
-## Arch Linux package
-
-It is available [here][1].
 
 [0]: https://www.opennicproject.org/
 [1]: https://aur.archlinux.org/packages/opennic-up
