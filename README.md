@@ -21,7 +21,7 @@ auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
 
 ## Arch Linux package
 
-An Arch Linux is available [here][1]
+It is available [here][1].
 
 [0]: https://www.opennicproject.org/
 [1]: https://aur.archlinux.org/packages/opennic-up
