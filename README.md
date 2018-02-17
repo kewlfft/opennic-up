@@ -6,7 +6,7 @@
 
 `# opennic-up`
 
-Replaces the Network Manager's dns servers with the 3 most responsive OpenNIC dns servers for your location. `resolv.conf` is also updated for immediate implementation of the new dns entries.
+Replaces the Network Manager's DNS servers with the 3 most responsive [OpenNIC][0] dns servers for your location. `resolv.conf` is also updated for immediate implementation of the new dns entries.
 
 ## Configuration
 
@@ -18,3 +18,10 @@ The file contains two lines defining **user** and **auth** for the member and ar
 user=myusername
 auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
 ```
+
+## Arch Linux package
+
+An Arch Linux is available [here][1]
+
+[0]: https://www.opennicproject.org/
+[1]: https://aur.archlinux.org/packages/opennic-up
