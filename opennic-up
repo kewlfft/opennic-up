@@ -34,7 +34,7 @@ for p in "${configpathlist[@]}"; do
   configfile=$p/opennic-up.conf
   if [ -r $configfile ]; then
     . $configfile
-    if [ -n "$userid" ] && [ -n "$userkey" ]; then 
+    if [ -n "$user" ] && [ -n "$auth" ]; then 
       echo "Recording IP for user: $userid"
       curl --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
     fi
