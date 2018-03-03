@@ -13,7 +13,7 @@ To enable and start the systemd timer that will update the DNS twice a week, use
 ```
 ### Dependencies
 The tools *awk*, *sort*, *uniq*, *curl*, *fping*, *xargs*, *drill* and *nmcli* are required and must be found in the environment path.
-For Arch Linux users this corresponds to three additional packages on top of the base distribution which will be installed with the package if not already present (*fping*, *curl* and  *networkmanager*).
+For Arch Linux users this corresponds to three additional packages on top of the base distribution which will be installed with the package if not already present: *fping*, *curl* and  *networkmanager*.
 
 ## Syntax
 
