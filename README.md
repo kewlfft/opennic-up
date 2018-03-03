@@ -6,11 +6,17 @@
 
 The `opennic-up` Bash script can be downloaded to your preferred location.
 
-For a full integration of the automated update process with you system and with systemd, an **Arch Linux** package is available [here][1].
+For a full integration of the automated update process with you system, an **Arch Linux** package is available [here][1].
 To enable and start the systemd timer that will update the DNS twice a week, use:
 ```
 # systemctl enable --now opennic-up.timer
 ```
+### Dependencies
+The tools *awk*, *sort*, *uniq*, *curl*, *fping*, *xargs*, *drill* and *nmcli* are required and must be found in the environment path.
+For **Arch Linux** this corresponds to three additional packages on top of the base distribution. They are dependencies of the package and will be installed automatically for the Arch Linux users.
+* fping
+* curl
+* networkmanager
 
 ## Syntax
 
