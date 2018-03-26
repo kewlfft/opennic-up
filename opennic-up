@@ -2,7 +2,7 @@
 
 # pings run in parallel
 multiping() {
-  fping --quiet --period=200 --retry=0 --count=20 "$@" 2>&1
+  fping --quiet --period=400 --retry=0 --count=20 "$@" 2>&1
 }
 
 # dns lookup nameserver hostname
