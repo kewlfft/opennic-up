@@ -2,7 +2,7 @@
 
 # pings run in parallel
 multiping() {
-  fping -q -p 20 -r 0 -c 25 "$@" 2>&1
+  fping --quiet --period=200 --retry=0 --count=20 "$@" 2>&1
 }
 
 # dns lookup nameserver hostname
@@ -21,26 +21,28 @@ done
 anycast=185.121.177.177
 # wait for network up 20s*4
 echo 'Checking network is up'
-fping -q -t 20000 $anycast
+fping --quiet --timeout=20000 $anycast
 
 # find out what the IP address of api.opennicproject.org is, fallback static IP address configured
 apihost=api.opennicproject.org
-apiip=$(dnslookup "${anycast}" "${apihost}")
+apiip=$(dnslookup "$anycast" "$apihost")
 apiip=${apiip:-"161.97.219.82"}
 echo "Using $apiip as API host"
 
-# record my IP in whitelist if my account login parameters have been provided
+# load config
 configpathlist=(/etc ~/.config/opennic-up)
 for p in "${configpathlist[@]}"; do
   configfile=$p/opennic-up.conf
   if [ -r $configfile ]; then
     . $configfile
-    if [ -n "$user" ] && [ -n "$auth" ]; then 
-      echo "Updating whitelist with IP for user: $user"
-      curl --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
-    fi
   fi
 done
+
+# record my IP in whitelist if my account login parameters have been provided
+if [ -n "$user" ] && [ -n "$auth" ]; then 
+  echo "Updating whitelist with IP for user: $user"
+  curl --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
+fi
 
 # query the API, list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
 apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
@@ -66,9 +68,11 @@ if [ "$reliablecount" -ge 2 ]; then
   responsivecount=$(echo "$responsive" | wc -l)
   echo "Resulting in $responsivecount responsive hosts"
 
-  retain=3
+  maxretain=3
   # replace Network Manager DNS with the new ones for all active connections
   if [ "$responsivecount" -ge 2 ]; then
+    retain=$((maxretain > responsivecount ? responsivecount : maxretain))
+
     # we retain the top servers for our DNS
     echo "Selected top $retain hosts:"
     myhosts=$(echo "$responsive" | head -n $retain)
