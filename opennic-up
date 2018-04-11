@@ -99,8 +99,10 @@ if [ "$reliablecount" -ge 2 ]; then
     done
   else
     echo 'Not enough responsive OpenNIC servers available' 1>&2
+    exit 1
   fi
 
 else
   echo 'Not enough OpenNIC servers available' 1>&2
+  exit 1
 fi
