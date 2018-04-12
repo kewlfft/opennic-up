@@ -22,9 +22,12 @@ For Arch Linux users this corresponds to two additional packages on top of the b
 ## Syntax
 
 `# opennic-up [options]`
+```
 options:
-    -v  verbose
+    -q  quiet
+    -v  version
     -h  help
+```
 
 Replaces the DNS servers with the 3 most responsive [OpenNIC][0] DNS servers for your location.
 
