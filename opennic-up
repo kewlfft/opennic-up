@@ -24,9 +24,11 @@ showhelp() {
 }
 
 log () {
-    if [[ $quiet -eq 0 ]]; then
-        echo "; $@"
-    fi
+    if [[ $quiet -eq 0 ]]; then echo "; $@"; fi
+}
+
+logn () {
+    if [[ $quiet -eq 0 ]]; then echo -n "; $@"; fi
 }
 
 
@@ -76,14 +78,13 @@ done
 
 # record my IP in whitelist if my account login parameters have been provided
 if [ -n "$user" ] && [ -n "$auth" ]; then 
-  log "Updating whitelist with IP for user: $user"
-  ipuser=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth")
-  log "$ipuser"
+  logn "Updating whitelist with IP for user: $user "
+  curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
 fi
 
 # query the API, list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
 apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
-log $apiurl
+log "$apiurl"
 allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" $apiurl)
 
 if [ -z "$allhosts" ]; then
@@ -97,13 +98,13 @@ reliablecount=$(echo "$reliable" | wc -l)
 
 if [ "$reliablecount" -ge 2 ]; then
   #pinging the hosts
-  log "Pinging $reliablecount hosts to determine the top ones..."
+  logn "Pinging $reliablecount hosts to determine the top ones..."
   pingresults=$(multiping $reliable)
 
   # we apply the packet loss filter and also sort the servers by their average response time and keep only the IP column
   responsive=$(echo "$pingresults" | awk -F/ '$5 + 0.0 < 10' | sort -t/ -nk8 | awk '{print $1}')
   responsivecount=$(echo "$responsive" | wc -l)
-  log "Resulting in $responsivecount responsive hosts"
+  echo "resulting in $responsivecount responsive hosts"
 
   maxretain=3
   # replace Network Manager DNS with the new ones for all active connections
