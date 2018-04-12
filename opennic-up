@@ -32,7 +32,7 @@ log () {
 
 # arguments handling
 quiet=0
-while getopts "hv" opt; do
+while getopts "hvq" opt; do
     case "$opt" in
     h)
         showhelp
