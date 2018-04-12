@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+script="opennic-up"
+version="0.90"
+
+resolvconf="/etc/resolv.conf"
+
 # pings run in parallel
 multiping() {
   fping --quiet --period=400 --retry=0 --count=20 "$@" 2>&1
@@ -11,28 +16,32 @@ dnslookup() {
 }
 
 showhelp() {
-    printf "%s\n" $"usage:  opennic-up [options]"
+    printf "%s\n" $"usage:  $script [options]"
     printf "%s\n" $"options:"
-    printf "%s\n" $"   -v     verbose"
+    printf "%s\n" $"   -q     quiet, show less information"
+    printf "%s\n" $"   -v     display version"
     printf "%s\n" $"   -h     help"
 }
 
 log () {
-    if [[ $verbose -eq 1 ]]; then
-        echo "# $1"
+    if [[ $quiet -eq 0 ]]; then
+        echo "; $1"
     fi
 }
 
 
 # arguments handling
-verbose=0
+quiet=0
 while getopts "hv" opt; do
     case "$opt" in
     h)
         showhelp
         exit 0
         ;;
-    v)  verbose=1
+    q)  quiet=1
+        ;;
+    v)  echo "$script $version"
+        exit 0
         ;;
     esac
 done
@@ -104,11 +113,11 @@ if [ "$reliablecount" -ge 2 ]; then
     # we retain the top servers for our DNS
     log "Selected top $retain hosts:"
     myhosts=$(echo "$responsive" | head -n $retain)
-    resolvconf=""
+    nameservers=""
     for dns in $myhosts; do
-      resolvconf=$resolvconf$(echo "$allhosts" | grep $dns | awk '$0="nameserver "$0')$'\n'
+      nameservers=$nameservers$(echo "$allhosts" | grep $dns | awk '$0="nameserver "$0')$'\n'
     done
-    echo -n "$resolvconf"
+    echo -n "$nameservers"
     # nmcli
     if command -v nmcli >/dev/null 2>&1; then
       for id in $(nmcli -terse -fields UUID connection show --active); do
@@ -130,12 +139,13 @@ if [ "$reliablecount" -ge 2 ]; then
         fi
       done
     else
-      if test -w /etc/resolv.conf; then
-        log 'Updating /etc/resolv.conf'
-        echo "$resolvconf" > /etc/resolv.conf
+      if test -w $resolvconf; then
+        log "Updating $resolvconf"
+        otherlines=$(grep -v '^nameserver ' "$resolvconf")
+        echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
         log 'Successful dns update'
       else 
-        log 'No dns change, no write access to /etc/resolv.conf'
+        log "No write access to $resolvconf, no change"
       fi
     fi
 
