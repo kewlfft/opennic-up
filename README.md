@@ -32,7 +32,7 @@ options:
 Replaces the DNS servers with the 3 most responsive [OpenNIC][0] DNS servers for your location.
 
 * If Network Manager *nmcli* is found in the path, it is used to update the DNS entries
-* Otherwise the `/etc/resolv.conf` file is updated directly with the new servers
+* Otherwise the `/etc/resolv.conf` file is updated directly with the new nameservers keeping the other options untouched
 
 ## Configuration
 
