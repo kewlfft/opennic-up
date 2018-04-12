@@ -25,7 +25,7 @@ showhelp() {
 
 log () {
     if [[ $quiet -eq 0 ]]; then
-        echo "; $1"
+        echo "; $@"
     fi
 }
 
@@ -115,7 +115,8 @@ if [ "$reliablecount" -ge 2 ]; then
     myhosts=$(echo "$responsive" | head -n $retain)
     nameservers=""
     for dns in $myhosts; do
-      nameservers=$nameservers$(echo "$allhosts" | grep $dns | awk '$0="nameserver "$0')$'\n'
+      log $(echo "$allhosts" | grep $dns)
+      nameservers=$nameservers"nameserver $dns"$'\n'
     done
     echo -n "$nameservers"
     # nmcli
