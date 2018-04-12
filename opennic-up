@@ -120,8 +120,9 @@ if [ "$reliablecount" -ge 2 ]; then
       nameservers=$nameservers"nameserver $dns"$'\n'
     done
     echo -n "$nameservers"
-    # nmcli
+ 
     if command -v nmcli >/dev/null 2>&1; then
+    # nmcli
       for id in $(nmcli -terse -fields UUID connection show --active); do
         currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
         if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
@@ -141,21 +142,25 @@ if [ "$reliablecount" -ge 2 ]; then
         fi
       done
     else
-      if test -w $resolvconf; then
-        log "Updating $resolvconf"
-        otherlines=$(grep -v '^nameserver ' "$resolvconf")
-        echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
-        log 'Successful dns update'
-      else 
-        log "No write access to $resolvconf, no change"
+    # resolv.conf
+      currentdnss=$(grep '^nameserver ' "$resolvconf" | cut -d' ' -f2)
+      if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
+          log 'No dns change'
+      else
+        if test -w $resolvconf; then
+          log "Updating $resolvconf"
+          otherlines=$(grep -v '^nameserver ' "$resolvconf")
+          echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
+          log 'Successful dns update'
+        else 
+          log "No write access to $resolvconf, no change"
+        fi
       fi
     fi
-
   else
     echo 'Not enough responsive OpenNIC servers available' 1>&2
     exit 1
   fi
-
 else
   echo 'Not enough OpenNIC servers available' 1>&2
   exit 1
