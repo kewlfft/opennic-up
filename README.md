@@ -11,7 +11,7 @@ The systemd service and timer provided are to be copied to `/usr/lib/systemd/sys
 For a full integration of the automated update process, an **Arch Linux** package is available [here][1].
 
 ### Scheduled update
-To enable and start the systemd timer that will update the DNS twice a week, use:
+To enable and start the systemd timer that will update the DNS servers twice a week, use:
 ```
 # systemctl enable --now opennic-up.timer
 ```
