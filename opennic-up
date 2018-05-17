@@ -56,10 +56,10 @@ for needed_single in $needed; do
 	exit 1
 done
 
-anycast=185.121.177.177
+anycast="185.121.177.177"
 # wait for network up 20s*4
 log 'Checking network is up'
-fping --quiet --timeout=20000 $anycast
+fping --quiet --timeout=20000 "$anycast"
 
 # find out what the IP address of api.opennicproject.org is, fallback static IP address configured
 apihost=api.opennicproject.org
@@ -71,7 +71,7 @@ log "Using $apiip as API host"
 configpathlist=(/etc ~/.config/opennic-up)
 for p in "${configpathlist[@]}"; do
   configfile=$p/opennic-up.conf
-  if [ -r $configfile ]; then
+  if [ -r "$configfile" ]; then
     . $configfile
   fi
 done
@@ -85,7 +85,7 @@ fi
 # query the API, list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
 apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 log "$apiurl"
-allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" $apiurl)
+allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$apiurl")
 
 if [ -z "$allhosts" ]; then
   echo 'API not available' 1>&2
