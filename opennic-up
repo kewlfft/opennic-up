@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 script="opennic-up"
 version="0.90"
@@ -24,11 +24,11 @@ showhelp() {
 }
 
 log () {
-    if [[ $quiet -eq 0 ]]; then echo "; $@"; fi
+    if [ $quiet -eq 0 ]; then echo "; $@"; fi
 }
 
 logn () {
-    if [[ $quiet -eq 0 ]]; then echo -n "; $@"; fi
+    if [ $quiet -eq 0 ]; then echo -n "; $@"; fi
 }
 
 
@@ -77,7 +77,7 @@ for p in "${configpathlist[@]}"; do
 done
 
 # record my IP in whitelist if my account login parameters have been provided
-if [ -n "$user" ] && [ -n "$auth" ]; then 
+if [ -n "$user" -a -n "$auth" ]; then 
   logn "Updating whitelist with IP for user: $user "
   curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
 fi
@@ -96,7 +96,7 @@ fi
 reliable=$(echo "$allhosts" | awk -F# '$3 + 0.0 > 90' | awk -F# '{print $1}')
 reliablecount=$(echo "$reliable" | wc -l)
 
-if [ "$reliablecount" -ge 2 ]; then
+if [ $reliablecount -ge 2 ]; then
   #pinging the hosts
   logn "Pinging $reliablecount hosts to determine the top ones..."
   pingresults=$(multiping $reliable)
@@ -108,7 +108,7 @@ if [ "$reliablecount" -ge 2 ]; then
 
   maxretain=3
   # replace Network Manager DNS with the new ones for all active connections
-  if [ "$responsivecount" -ge 2 ]; then
+  if [ $responsivecount -ge 2 ]; then
     retain=$((maxretain > responsivecount ? responsivecount : maxretain))
 
     # we retain the top servers for our DNS
