@@ -147,7 +147,7 @@ if [ $reliablecount -ge 2 ]; then
       if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
           log 'No dns change'
       else
-        if test -w $resolvconf; then
+        if [ -w "$resolvconf" ]; then
           log "Updating $resolvconf"
           otherlines=$(grep -v '^nameserver ' "$resolvconf")
           echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
