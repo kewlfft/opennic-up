@@ -52,7 +52,7 @@ done
 neededlist="awk sort curl fping drill"
 for needed in $neededlist; do
 	command -v "$needed" >/dev/null 2>&1 && continue
-	echo "$needed: is required but cannot be found in your environment path" 1>&2
+	echo "$needed: is required but cannot be found in the environment path" 1>&2
 	exit 1
 done
 
