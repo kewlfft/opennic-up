@@ -49,7 +49,7 @@ while getopts "hvq" opt; do
 done
 
 # check needed tools are present
-neededlist="awk sort uniq curl fping xargs drill"
+neededlist="awk sort curl fping drill"
 for needed in $neededlist; do
 	command -v "$needed" >/dev/null 2>&1 && continue
 	echo "$needed: is required but cannot be found in your environment path" 1>&2
