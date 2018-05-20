@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 script="opennic-up"
 version="0.91"
