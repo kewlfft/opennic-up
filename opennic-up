@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 script="opennic-up"
-version="0.90"
+version="0.91"
 
 resolvconf="/etc/resolv.conf"
 
@@ -49,10 +49,10 @@ while getopts "hvq" opt; do
 done
 
 # check needed tools are present
-needed="awk sort uniq curl fping xargs drill"
-for needed_single in $needed; do
-	command -v "$needed_single" >/dev/null 2>&1 && continue
-	echo "$needed_single: is required, it is not installed or has not been found in your environment paths" 1>&2
+neededlist="awk sort uniq curl fping xargs drill"
+for needed in $neededlist; do
+	command -v "$needed" >/dev/null 2>&1 && continue
+	echo "$needed: is required but cannot be found in your environment path" 1>&2
 	exit 1
 done
 
