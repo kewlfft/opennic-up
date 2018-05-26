@@ -1,7 +1,7 @@
 #!/bin/bash
 
 script="opennic-up"
-version="0.91"
+version="0.92"
 
 resolvconf="/etc/resolv.conf"
 
