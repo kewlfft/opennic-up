@@ -31,6 +31,13 @@ logn () {
     if [ $quiet -eq 0 ]; then echo -n "; $@"; fi
 }
 
+error() {
+  printf "ERROR: %s\n" "$1" >&2
+}
+
+warning() {
+  printf "WARNING: %s\n" "$1" >&2
+}
 
 # arguments handling
 quiet=0
@@ -88,7 +95,7 @@ log "$apiurl"
 allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$apiurl")
 
 if [ -z "$allhosts" ]; then
-  echo 'API not available' >&2
+  error 'API not available'
   exit 1
 fi
 
@@ -122,7 +129,7 @@ if [ $reliablecount -ge 2 ]; then
     echo -n "$nameservers"
  
     if command -v nmcli >/dev/null 2>&1; then
-    # nmcli
+      # nmcli
       for id in $(nmcli -terse -fields UUID connection show --active); do
         currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
         if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
@@ -142,7 +149,7 @@ if [ $reliablecount -ge 2 ]; then
         fi
       done
     else
-    # resolv.conf
+      # resolv.conf
       currentdnss=$(grep '^nameserver ' "$resolvconf" | cut -d' ' -f2)
       if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
           log 'No dns change'
@@ -153,15 +160,15 @@ if [ $reliablecount -ge 2 ]; then
           echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
           log 'Successful dns update'
         else 
-          log "No write access to $resolvconf, no change"
+          warning "No write access to $resolvconf, no change"
         fi
       fi
     fi
   else
-    echo 'Not enough responsive OpenNIC servers available' >&2
+    error 'not enough responsive OpenNIC servers available'
     exit 1
   fi
 else
-  echo 'Not enough OpenNIC servers available' >&2
+  error 'not enough OpenNIC servers available'
   exit 1
 fi
