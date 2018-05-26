@@ -16,11 +16,11 @@ dnslookup() {
 }
 
 showhelp() {
-    printf "%s\n" $"usage:  $script [options]"
-    printf "%s\n" $"options:"
-    printf "%s\n" $"   -q     quiet, show less information"
-    printf "%s\n" $"   -v     display version"
-    printf "%s\n" $"   -h     help"
+    printf -- "usage:  $script [options]\n"
+    printf -- "options:\n"
+    printf -- "   -q     quiet, show less information\n"
+    printf -- "   -v     display version\n"
+    printf -- "   -h     help\n"
 }
 
 log () {
