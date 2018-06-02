@@ -24,11 +24,11 @@ showhelp() {
 }
 
 log () {
-    if [ $quiet -eq 0 ]; then echo "; $@"; fi
+    if [ $quiet -eq 0 ]; then echo "$@" >&2; fi
 }
 
 logn () {
-    if [ $quiet -eq 0 ]; then echo -n "; $@"; fi
+    if [ $quiet -eq 0 ]; then echo -n "$@" >&2; fi
 }
 
 error() {
@@ -111,7 +111,7 @@ if [ $reliablecount -ge 2 ]; then
   # we apply the packet loss filter and also sort the servers by their average response time and keep only the IP column
   responsive=$(echo "$pingresults" | awk -F/ '$5 + 0.0 < 10' | sort -t/ -nk8 | awk '{print $1}')
   responsivecount=$(echo "$responsive" | wc -l)
-  echo "resulting in $responsivecount responsive hosts"
+  log "resulting in $responsivecount responsive hosts"
 
   maxretain=3
   # replace Network Manager DNS with the new ones for all active connections
