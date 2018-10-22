@@ -1,7 +1,7 @@
 #!/bin/bash
 
 script="opennic-up"
-version="0.92"
+version="0.93"
 
 resolvconf="/etc/resolv.conf"
 
@@ -64,6 +64,7 @@ for needed in $neededlist; do
 done
 
 anycast="185.121.177.177"
+
 # wait for network up 20s*4
 log 'Checking network is up'
 fping --quiet --timeout=20000 "$anycast"
@@ -74,7 +75,7 @@ apiip=$(dnslookup "$anycast" "$apihost")
 apiip=${apiip:-"161.97.219.82"}
 log "Using $apiip as API host"
 
-# load config
+# source opennic-up config
 configpathlist=(/etc ~/.config/opennic-up)
 for p in "${configpathlist[@]}"; do
   configfile=$p/opennic-up.conf
@@ -89,7 +90,7 @@ if [ -n "$user" -a -n "$auth" ]; then
   curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
 fi
 
-# query the API, list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
+# query the API: list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
 apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 log "$apiurl"
 allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$apiurl")
@@ -114,7 +115,6 @@ if [ $reliablecount -ge 2 ]; then
   log "resulting in $responsivecount responsive hosts"
 
   maxretain=3
-  # replace Network Manager DNS with the new ones for all active connections
   if [ $responsivecount -ge 2 ]; then
     retain=$((maxretain > responsivecount ? responsivecount : maxretain))
 
@@ -129,7 +129,7 @@ if [ $reliablecount -ge 2 ]; then
     echo -n "$nameservers"
  
     if command -v nmcli >/dev/null 2>&1; then
-      # nmcli
+      # nmcli: replace with our DNS all active connections
       for id in $(nmcli -terse -fields UUID connection show --active); do
         currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
         if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
