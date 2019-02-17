@@ -50,7 +50,7 @@ auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
 ```
 maxretain=2
 ```
-* The minimum required reliability of DNS servers as indicated in the retrieved server list, 90 by default, can be changed using the **minreliability** option:
+* The minimum required reliability of DNS servers as indicated in the retrieved server list, 90 by default (for 90% reliability), can be changed using the **minreliability** option:
 ```
 minreliability=2
 ```
