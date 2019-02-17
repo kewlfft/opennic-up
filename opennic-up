@@ -1,7 +1,7 @@
 #!/bin/bash
 
 script="opennic-up"
-version="0.93"
+version="0.94"
 
 resolvconf="/etc/resolv.conf"
 
@@ -114,9 +114,9 @@ if [ $reliablecount -ge 2 ]; then
   responsivecount=$(echo "$responsive" | wc -l)
   log "resulting in $responsivecount responsive hosts"
 
-  maxretain=3
+  mymaxretain=${maxretain:-3}
   if [ $responsivecount -ge 2 ]; then
-    retain=$((maxretain > responsivecount ? responsivecount : maxretain))
+    retain=$((mymaxretain > responsivecount ? responsivecount : mymaxretain))
 
     # we retain the top servers for our DNS
     log "Selected top $retain hosts:"

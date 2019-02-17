@@ -29,7 +29,7 @@ options:
     -h  help
 ```
 
-Replaces the DNS servers with the 3 most responsive [OpenNIC][0] DNS servers for your location.
+By default, replaces the DNS servers with the 3 most responsive [OpenNIC][0] DNS servers for your location.
 
 * If Network Manager *nmcli* is found in the path, it is used to update the DNS entries
 * Otherwise the `/etc/resolv.conf` file is updated directly with the new nameservers keeping the other options untouched
@@ -45,6 +45,11 @@ The configuration file defines the OpenNIC [member][3]'s **user** and **auth** u
 user=myusername
 auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
 ```
+The number of DNS servers to retain, 3 by default, can be changed using the **maxretain** option:
+```
+maxretain=2
+```
+
 
 [0]: https://www.opennicproject.org/
 [1]: https://aur.archlinux.org/packages/opennic-up
