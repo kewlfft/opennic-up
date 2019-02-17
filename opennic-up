@@ -1,7 +1,7 @@
 #!/bin/bash
 
 script="opennic-up"
-version="0.94"
+version="0.95"
 
 resolvconf="/etc/resolv.conf"
 
@@ -101,7 +101,8 @@ if [ -z "$allhosts" ]; then
 fi
 
 # filter hosts with more than 90% reliability
-reliable=$(echo "$allhosts" | awk -F# '$3 + 0.0 > 90' | awk -F# '{print $1}')
+myminreliability=${minreliability:-90}
+reliable=$(echo "$allhosts" | awk -F# '$3 + 0.0 > '"$myminreliability" | awk -F# '{print $1}')
 reliablecount=$(echo "$reliable" | wc -l)
 
 if [ $reliablecount -ge 2 ]; then

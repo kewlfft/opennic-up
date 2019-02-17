@@ -49,7 +49,10 @@ The number of DNS servers to retain, 3 by default, can be changed using the **ma
 ```
 maxretain=2
 ```
-
+The minimum required reliability of DNS servers as indicated in the retrieved server list, 90 by default, can be changed using the **minreliability** option:
+```
+minreliability=2
+```
 
 [0]: https://www.opennicproject.org/
 [1]: https://aur.archlinux.org/packages/opennic-up
