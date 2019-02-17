@@ -41,20 +41,19 @@ By default, replaces the DNS servers with the 3 most responsive [OpenNIC][0] DNS
 
 *opennic-up* looks for the file at the location `/etc/opennic-up.conf`. Alternatively it can be saved in the user location `~/.config/opennic-up/opennic-up.conf` and in this case it takes precedence over the former.
 
-The configuration file defines the OpenNIC [member][3]'s **user** and **auth** used to register one's IP for [whitelisting][4]. For example:
+* The configuration file defines the OpenNIC [member][3]'s **user** and **auth** used to register one's IP for [whitelisting][4]. For example:
 ```
 user=myusername
 auth=TbuARbBxHHGznNScvVLKZDDR9ZGVKdhqxj8dkzCQ
 ```
-The number of DNS servers to retain, 3 by default, can be changed using the **maxretain** option:
+* The number of DNS servers to retain, 3 by default, can be changed using the **maxretain** option:
 ```
 maxretain=2
 ```
-The minimum required reliability of DNS servers as indicated in the retrieved server list, 90 by default, can be changed using the **minreliability** option:
+* The minimum required reliability of DNS servers as indicated in the retrieved server list, 90 by default, can be changed using the **minreliability** option:
 ```
 minreliability=2
 ```
-
 [0]: https://www.opennicproject.org/
 [1]: https://aur.archlinux.org/packages/opennic-up
 [3]: https://www.opennicproject.org/members/
