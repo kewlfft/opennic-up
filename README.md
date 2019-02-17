@@ -17,7 +17,8 @@ A systemd timer unit is provided, to enable and start the timer that will update
 ```
 ### Dependencies
 The tools *awk*, *sort*, *uniq*, *curl*, *fping*, *xargs*, *drill* are required and must be found in the environment path.
-For Arch Linux users this corresponds to two additional packages on top of the base distribution which will be installed with the package if not already present: *fping* and *curl*.
+For Arch Linux users this corresponds to two additional packages on top of the base distribution which will be installed with the package if not already present: *fping* and *ldns*.
+Network Manager is an optional dependency and will be used if installed.
 
 ## Syntax
 
