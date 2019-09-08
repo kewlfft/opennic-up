@@ -17,8 +17,13 @@ A systemd timer unit is provided, to enable and start the timer that will update
 ```
 ### Dependencies
 The tools *awk*, *sort*, *uniq*, *curl*, *fping*, *xargs*, *drill* are required and must be found in the environment path.
-For Arch Linux users this corresponds to two additional packages on top of the base distribution which will be installed with the package if not already present: *fping* and *ldns*.
 Network Manager is an optional dependency and will be used if installed.
+
+#### Arch Linux
+For Arch Linux users this corresponds to two additional packages on top of the base distribution which will be installed with the package if not already present: *fping* and *ldns*.
+
+#### RedHat, CentOS, Fedora
+You will need to install `fping` and `ldns`. On Fedora, you will need to install `ldns-utils`, too.
 
 ## Syntax
 
@@ -37,7 +42,7 @@ By default, replaces the DNS servers with the 3 most responsive [OpenNIC][0] DNS
 
 ## Configuration
 
-`opennic-up.conf` is the configuration file for *opennic-up*. 
+`opennic-up.conf` is the configuration file for *opennic-up*.
 
 *opennic-up* looks for the file at the location `/etc/opennic-up.conf`. Alternatively it can be saved in the user location `~/.config/opennic-up/opennic-up.conf` and in this case it takes precedence over the former.
 
