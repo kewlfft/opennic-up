@@ -1,9 +1,9 @@
 #!/bin/bash
-
 script="opennic-up"
 version="0.95"
 
 resolvconf="/etc/resolv.conf"
+usefile=0
 
 # pings run in parallel
 multiping() {
@@ -41,7 +41,7 @@ warning() {
 
 # arguments handling
 quiet=0
-while getopts "hvq" opt; do
+while getopts ":hvqf:" opt; do
     case "$opt" in
     h)
         showhelp
@@ -52,15 +52,21 @@ while getopts "hvq" opt; do
     v)  echo "$script $version"
         exit 0
         ;;
+    f)  resolvconf=$OPTARG
+        usefile=1
+        ;;
+    :)  echo "Missing option argument for -$OPTARG" >&2
+        exit 1
+        ;;
     esac
 done
 
 # check needed tools are present
 neededlist="awk sort curl fping drill"
 for needed in $neededlist; do
-	command -v "$needed" >/dev/null 2>&1 && continue
-	echo "$needed: is required but cannot be found in the environment path" >&2
-	exit 1
+  command -v "$needed" >/dev/null 2>&1 && continue
+  echo "$needed: is required but cannot be found in the environment path" >&2
+  exit 1
 done
 
 anycast="185.121.177.177"
@@ -85,7 +91,7 @@ for p in "${configpathlist[@]}"; do
 done
 
 # record my IP in whitelist if my account login parameters have been provided
-if [ -n "$user" -a -n "$auth" ]; then 
+if [ -n "$user" -a -n "$auth" ]; then
   logn "Updating whitelist with IP for user: $user "
   curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
 fi
@@ -128,8 +134,8 @@ if [ $reliablecount -ge 2 ]; then
       nameservers=$nameservers"nameserver $dns"$'\n'
     done
     echo -n "$nameservers"
- 
-    if command -v nmcli >/dev/null 2>&1; then
+
+    if [ $usefile -eq 0 ] && command -v nmcli >/dev/null 2>&1; then
       # nmcli: replace with our DNS all active connections
       for id in $(nmcli -terse -fields UUID connection show --active); do
         currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
@@ -151,6 +157,7 @@ if [ $reliablecount -ge 2 ]; then
       done
     else
       # resolv.conf
+      touch $resolvconf
       currentdnss=$(grep '^nameserver ' "$resolvconf" | cut -d' ' -f2)
       if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
           log 'No dns change'
@@ -160,7 +167,7 @@ if [ $reliablecount -ge 2 ]; then
           otherlines=$(grep -v '^nameserver ' "$resolvconf")
           echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
           log 'Successful dns update'
-        else 
+        else
           warning "No write access to $resolvconf, no change"
         fi
       fi
