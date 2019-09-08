@@ -7,7 +7,7 @@ usefile=0
 
 # pings run in parallel
 multiping() {
-  fping --quiet --period=400 --retry=0 --count=20 "$@" 2>&1
+  fping -q -p 400 -r 0 -c 20 "$@" 2>&1
 }
 
 # dns lookup nameserver hostname
@@ -74,7 +74,7 @@ anycast="185.121.177.177"
 
 # wait for network up 20s*4
 log 'Checking network is up'
-fping --quiet --timeout=20000 "$anycast"
+fping -q -t 20000 "$anycast"
 
 # find out what the IP address of api.opennicproject.org is, fallback static IP address configured
 apihost=api.opennicproject.org
