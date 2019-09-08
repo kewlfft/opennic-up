@@ -17,8 +17,13 @@ A systemd timer unit is provided, to enable and start the timer that will update
 ```
 ### Dependencies
 The tools *awk*, *sort*, *uniq*, *curl*, *fping*, *xargs*, *drill* are required and must be found in the environment path.
-For Arch Linux users this corresponds to two additional packages on top of the base distribution which will be installed with the package if not already present: *fping* and *ldns*.
 Network Manager is an optional dependency and will be used if installed.
+
+#### Arch Linux
+For Arch Linux users this corresponds to two additional packages on top of the base distribution which will be installed with the package if not already present: *fping* and *ldns*.
+
+#### RedHat, CentOS, Fedora
+You will need to install `fping` and `ldns`. On Fedora, you will need to install `ldns-utils`, too.
 
 ## Syntax
 
@@ -28,16 +33,18 @@ options:
     -q  quiet
     -v  version
     -h  help
+    -f  <file> custom resolv.conf file
 ```
 
 By default, replaces the DNS servers with the 3 most responsive [OpenNIC][0] DNS servers for your location.
 
 * If Network Manager *nmcli* is found in the path, it is used to update the DNS entries
 * Otherwise the `/etc/resolv.conf` file is updated directly with the new nameservers keeping the other options untouched
+* When `-f` is used to give a path, NetworkManager is ignored and the custom resolv.conf will receive the update
 
 ## Configuration
 
-`opennic-up.conf` is the configuration file for *opennic-up*. 
+`opennic-up.conf` is the configuration file for *opennic-up*.
 
 *opennic-up* looks for the file at the location `/etc/opennic-up.conf`. Alternatively it can be saved in the user location `~/.config/opennic-up/opennic-up.conf` and in this case it takes precedence over the former.
 
