@@ -18,9 +18,10 @@ dnslookup() {
 showhelp() {
     printf -- "usage:  $script [options]\n"
     printf -- "options:\n"
-    printf -- "   -q     quiet, show less information\n"
-    printf -- "   -v     display version\n"
-    printf -- "   -h     help\n"
+    printf -- "   -q         quiet, show less information\n"
+    printf -- "   -v         display version\n"
+    printf -- "   -h         help\n"
+    printf -- "   -f <file>  custom resolv.conf file\n"
 }
 
 log () {
