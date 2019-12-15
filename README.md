@@ -8,7 +8,7 @@ The `opennic-up` Bash script can be downloaded to your preferred location.
 The systemd service and timer provided are to be copied to `/usr/lib/systemd/system/`.
 
 ### Arch linux package
-For a full integration of the automated update process, an **Arch Linux** package is available [here][1].
+For a full integration of the automated update process, an [Arch Linux][1] package is available [here][2].
 
 ### Scheduled update with systemd time
 A systemd timer unit is provided, to enable and start the timer that will update the DNS servers twice a week, use:
@@ -62,6 +62,7 @@ maxretain=2
 minreliability=2
 ```
 [0]: https://www.opennicproject.org/
-[1]: https://aur.archlinux.org/packages/opennic-up
+[1]: https://www.archlinux.org/
+[2]: https://aur.archlinux.org/packages/opennic-up
 [3]: https://www.opennicproject.org/members/
 [4]: https://wiki.opennic.org/api/whitelist
