@@ -22,6 +22,9 @@ Network Manager is an optional dependency and will be used if installed.
 #### Arch Linux
 For Arch Linux users this corresponds to two dependencies on top of the base distribution which will be installed if not already present: `fping` and `ldns`.
 
+### Ubuntu
+For Ubuntu users, drill is provided by the `ldnsutils` package.
+
 #### RedHat, CentOS, Fedora
 You will need to install `fping` and `ldns`. On Fedora, you will need to install `ldns-utils` too.
 
