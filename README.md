@@ -24,6 +24,8 @@ For Arch Linux users this corresponds to two dependencies on top of the base dis
 
 #### RedHat, CentOS, Fedora
 You will need to install `fping` and `ldns`. On Fedora, you will need to install `ldns-utils`.
+
+#### Ubuntu
 For Ubuntu users, *drill* is provided by the `ldnsutils` package.
 
 ## Syntax
