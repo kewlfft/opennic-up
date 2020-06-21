@@ -12,7 +12,7 @@ multiping() {
 
 # dns lookup nameserver hostname
 dnslookup() {
-  drill A $2 @$1 | awk '$1 == "'"$2"'." && $3 == "IN" && $4 == "A" {print $5}'
+  drill A $2 @$1 | awk '$1 == "'"$2"'." && $3 == "IN" && $4 == "A" {print $5; exit}'
 }
 
 showhelp() {
@@ -38,6 +38,10 @@ error() {
 
 warning() {
   printf "WARNING: %s\n" "$1" >&2
+}
+
+api() {
+  curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$1"  
 }
 
 # arguments handling
@@ -77,8 +81,9 @@ log 'Checking network is up'
 fping -q -t 20000 "$anycast"
 
 # find out what the IP address of api.opennicproject.org is, fallback static IP address configured
-apihost=api.opennicproject.org
+apihost=api.opennic.org
 apiip=$(dnslookup "$anycast" "$apihost")
+echo $apiip
 apiip=${apiip:-"161.97.219.82"}
 log "Using $apiip as API host"
 
@@ -94,13 +99,13 @@ done
 # record my IP in whitelist if my account login parameters have been provided
 if [ -n "$user" -a -n "$auth" ]; then
   logn "Updating whitelist with IP for user: $user "
-  curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "https://$apihost/ip/update/?user=$user&auth=$auth"
+  api "https://$apihost/ip/update/?user=$user&auth=$auth"
 fi
 
 # query the API: list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
 apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 log "$apiurl"
-allhosts=$(curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$apiurl")
+allhosts=$(api "$apiurl")
 
 if [ -z "$allhosts" ]; then
   error 'API not available'
