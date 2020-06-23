@@ -10,6 +10,9 @@ The systemd service and timer provided are to be copied to `/usr/lib/systemd/sys
 ### Arch Linux package
 If you use [Arch Linux][1], a package is available [here][2] and provides a full integration of the automated update process.
 
+### Gentoo package
+If you use [Gentoo][5], a package is available [here][6] and provides full integration for the automated update process.
+
 ### Scheduled update with systemd time
 A systemd timer unit is provided, to enable and start the timer that will update the DNS servers twice a week, use:
 ```
@@ -27,6 +30,9 @@ You will need to install `fping` and `ldns`. On Fedora, you will need to install
 
 #### Ubuntu
 For Ubuntu users, *drill* is provided by the `ldnsutils` package.
+
+#### Gentoo, Funtoo
+You will need to install `net-analyzer/fping`, `net-dns/ldns-utils`, and `net-misc/curl`.
 
 ## Syntax
 
@@ -64,8 +70,10 @@ maxretain=2
 ```
 minreliability=2
 ```
-[0]: https://www.opennicproject.org/
-[1]: https://www.archlinux.org/
+[0]: https://www.opennicproject.org
+[1]: https://www.archlinux.org
 [2]: https://aur.archlinux.org/packages/opennic-up
-[3]: https://www.opennicproject.org/members/
+[3]: https://www.opennicproject.org/members
 [4]: https://wiki.opennic.org/api/whitelist
+[5]: https://www.gentoo.org
+[6]: https://github.com/gentoo-mirror/rage/tree/master/net-dns/opennic-up
