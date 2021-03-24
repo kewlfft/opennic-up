@@ -12,11 +12,11 @@ multiping() {
 
 # dns lookup nameserver hostname
 dnslookup() {
-  drill A $2 @$1 | awk '$1 == "'"$2"'." && $3 == "IN" && $4 == "A" {print $5; exit}'
+  drill A "$2" @"$1" | awk '$1 == "'"$2"'." && $3 == "IN" && $4 == "A" {print $5; exit}'
 }
 
 showhelp() {
-    printf -- "usage:  $script [options]\n"
+    printf -- "usage:  %s [options]\n" "$script"
     printf -- "options:\n"
     printf -- "   -q         quiet, show less information\n"
     printf -- "   -v         display version\n"
@@ -25,11 +25,11 @@ showhelp() {
 }
 
 log () {
-    if [ $quiet -eq 0 ]; then echo "$@" >&2; fi
+    if [ "$quiet" -eq 0 ]; then echo "$@" >&2; fi
 }
 
 logn () {
-    if [ $quiet -eq 0 ]; then echo -n "$@" >&2; fi
+    if [ "$quiet" -eq 0 ]; then echo -n "$@" >&2; fi
 }
 
 error() {
@@ -63,6 +63,10 @@ while getopts ":hvqf:" opt; do
     :)  echo "Missing option argument for -$OPTARG" >&2
         exit 1
         ;;
+    ?) echo "Invalid argument $OPTARG$" >&2
+       showhelp
+       exit 1
+       ;;
     esac
 done
 
@@ -79,7 +83,7 @@ configpathlist=(/etc ~/.config/opennic-up)
 for p in "${configpathlist[@]}"; do
   configfile=$p/opennic-up.conf
   if [ -r "$configfile" ]; then
-    . $configfile
+    . "$configfile"
   fi
 done
 
@@ -95,7 +99,7 @@ apiip=${apiip:-"116.203.98.109"}
 log "Using $apiip as API host"
 
 # record my IP in whitelist if my account login parameters have been provided
-if [ -n "$user" -a -n "$auth" ]; then
+if [ -n "$user" ] && [ -n "$auth" ]; then
   logn "Updating whitelist with IP for user: $user "
   api "https://$apihost/ip/update/?user=$user&auth=$auth"
 fi
@@ -115,7 +119,7 @@ myminreliability=${minreliability:-90}
 reliable=$(echo "$allhosts" | awk -F# '$3 + 0.0 > '"$myminreliability" | awk -F# '{print $1}')
 reliablecount=$(echo "$reliable" | wc -l)
 
-if [ $reliablecount -ge 2 ]; then
+if [ "$reliablecount" -ge 2 ]; then
   #pinging the hosts
   logn "Pinging $reliablecount hosts to determine the top ones..."
   pingresults=$(multiping $reliable)
@@ -126,7 +130,7 @@ if [ $reliablecount -ge 2 ]; then
   log "resulting in $responsivecount responsive hosts"
 
   mymaxretain=${maxretain:-3}
-  if [ $responsivecount -ge 2 ]; then
+  if [ "$responsivecount" -ge 2 ]; then
     retain=$((mymaxretain > responsivecount ? responsivecount : mymaxretain))
 
     # we retain the top servers for our DNS
@@ -134,7 +138,7 @@ if [ $reliablecount -ge 2 ]; then
     myhosts=$(echo "$responsive" | head -n $retain)
     nameservers=""
     for dns in $myhosts; do
-      log $(echo "$allhosts" | grep $dns)
+      log "$(echo "$allhosts" | grep "$dns")"
       nameservers=$nameservers"nameserver $dns"$'\n'
     done
     echo -n "$nameservers"
@@ -142,20 +146,20 @@ if [ $reliablecount -ge 2 ]; then
     if [ $usefile -eq 0 ] && command -v nmcli >/dev/null 2>&1; then
       # nmcli: replace with our DNS all active connections
       for id in $(nmcli -terse -fields UUID connection show --active); do
-        currentdnss=$(nmcli -terse -fields ipv4.dns connection show $id | cut -d: -f2- | tr "," "\n")
+        currentdnss=$(nmcli -terse -fields ipv4.dns connection show "$id" | cut -d: -f2- | tr "," "\n")
         if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
             log 'No dns change'
         else
             #statements
             for dns in $currentdnss; do
-              nmcli connection modify $id -ipv4.dns $dns
+              nmcli connection modify "$id" -ipv4.dns "$dns"
             done
 
             for dns in $myhosts; do
-              nmcli connection modify $id +ipv4.dns $dns
+              nmcli connection modify "$id" +ipv4.dns "$dns"
             done
             log "Updating $id"
-            nmcli connection up $id >/dev/null
+            nmcli connection up "$id" >/dev/null
             log 'Successful dns update'
         fi
       done
@@ -184,3 +188,4 @@ else
   error 'not enough OpenNIC servers available'
   exit 1
 fi
+
