@@ -90,7 +90,7 @@ done
 initdns=${initdns:-"185.121.177.177 169.239.202.202 172.98.193.42"}
 # retrieve first responding dns from initdns list
 log "Selecting DNS among $initdns..."
-respondingdns=$(multiping 1 $initdns | awk -F/ '$5 + 0.0 < 10' | awk '{print $1;exit}')
+respondingdns=$(multiping 2 $initdns | awk -F/ '$5 + 0.0 < 10' | awk '{print $1;exit}')
 if [ -z "$respondingdns" ]; then
   # none responding, network may be down, wait for first
   waitdns=$(echo "$initdns" | awk '{print $1}')
@@ -184,7 +184,7 @@ if [ "$reliablecount" -ge 2 ]; then
           echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
           log 'Successful DNS update'
         else
-          warning "no write access to $resolvconf, no change"
+          warning "no write access to '$resolvconf', no change"
         fi
       fi
     fi
