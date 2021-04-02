@@ -70,9 +70,9 @@ maxretain=2
 ```
 minreliability=2
 ```
-* The initial DNS server used for name resolution is the OpenNIC anycast 185.121.177.177, it can be changed:
+* The initial DNS server used for name resolution, more than one can be provided for fallback (separated by space):
 ```
-initdns=1.1.1.1
+initdns=1.1.1.1 208.67.222.123
 ```
 
 [0]: https://www.opennicproject.org
