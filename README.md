@@ -70,7 +70,7 @@ maxretain=2
 ```
 minreliability=2
 ```
-* The initial DNS server used for name resolution, more than one can be provided for fallback (separated by space):
+* The DNS server used for the initial api.opennicproject.org's name resolution, more than one can be provided for fallback (space separated):
 ```
 initdns=1.1.1.1 208.67.222.123
 ```
