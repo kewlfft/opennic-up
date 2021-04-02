@@ -1,13 +1,13 @@
 #!/bin/bash
 script="opennic-up"
-version="1.00"
+version="1.1"
 
 resolvconf="/etc/resolv.conf"
 usefile=0
 
-# pings run in parallel
+# pings run in parallel, send $1 pings to each target
 multiping() {
-  fping -q -p 400 -r 0 -c 20 "$@" 2>&1
+  fping -q -p 400 -r 0 -c "$1" "${@:2}" 2>&1
 }
 
 # dns lookup nameserver hostname
@@ -40,7 +40,7 @@ warning() {
   printf "WARNING: %s\n" "$1" >&2
 }
 
-api() {
+apicurl() {
   curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$1"  
 }
 
@@ -87,13 +87,20 @@ for p in "${configpathlist[@]}"; do
   fi
 done
 
-initdns=${initdns:-"185.121.177.177"}
-apihost=${apihost:-"api.opennic.org"}
-# wait for network up 20000 = 20s*4
-log "Waiting for $initdns"
-if fping -q -t 20000 "$initdns"; then
-  # find out what the IP address of api is, fallback static IP address configured
-  apiip=$(dnslookup "$initdns" "$apihost")
+initdns=${initdns:-"185.121.177.177 169.239.202.202 172.98.193.42"}
+# retrieve first responding dns from initdns list
+log "Selecting DNS among $initdns..."
+respondingdns=$(multiping 1 $initdns | awk -F/ '$5 + 0.0 < 10' | awk '{print $1;exit}')
+if [ -z "$respondingdns" ]; then
+  # none responding, network may be down, wait for first
+  waitdns=$(echo "$initdns" | awk '{print $1}')
+  log "Waiting for $waitdns..."
+  if fping -q -r 10 "$waitdns"; then respondingdns="$waitdns"; fi
+fi
+apihost=${apihost:-"api.opennicproject.org"}
+if [ -n "$respondingdns" ]; then
+  log "Using DNS $respondingdns to retrieve $apihost's IP"
+  apiip=$(dnslookup "$respondingdns" "$apihost")
 fi
 apiip=${apiip:-"116.203.98.109"}
 log "Using $apiip as API host"
@@ -101,13 +108,14 @@ log "Using $apiip as API host"
 # record my IP in whitelist if my account login parameters have been provided
 if [ -n "$user" ] && [ -n "$auth" ]; then
   logn "Updating whitelist with IP for user: $user "
-  api "https://$apihost/ip/update/?user=$user&auth=$auth"
+  wlapiip=${wlapiip:-"161.97.219.82"}
+  curl --silent --connect-timeout 60 --insecure "https://$wlapiip/ip/update/?user=$user&auth=$auth"
 fi
 
 # query the API: list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
 apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 log "$apiurl"
-allhosts=$(api "$apiurl")
+allhosts=$(apicurl "$apiurl")
 
 if [ -z "$allhosts" ]; then
   error 'API not available'
@@ -122,9 +130,9 @@ reliablecount=$(echo "$reliable" | wc -l)
 if [ "$reliablecount" -ge 2 ]; then
   #pinging the hosts
   logn "Pinging $reliablecount hosts to determine the top ones..."
-  pingresults=$(multiping $reliable)
+  pingresults=$(multiping 20 $reliable)
 
-  # we apply the packet loss filter and also sort the servers by their average response time and keep only the IP column
+  # packet loss must be below 10%, then sort the servers by their average response time, eventually keep only the IP column
   responsive=$(echo "$pingresults" | awk -F/ '$5 + 0.0 < 10' | sort -t/ -nk8 | awk '{print $1}')
   responsivecount=$(echo "$responsive" | wc -l)
   log "resulting in $responsivecount responsive hosts"
