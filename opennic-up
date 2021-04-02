@@ -1,6 +1,6 @@
 #!/bin/bash
 script="opennic-up"
-version="0.99"
+version="1.00"
 
 resolvconf="/etc/resolv.conf"
 usefile=0
