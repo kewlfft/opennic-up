@@ -156,7 +156,7 @@ if [ "$reliablecount" -ge 2 ]; then
       for id in $(nmcli -terse -fields UUID connection show --active); do
         currentdnss=$(nmcli -terse -fields ipv4.dns connection show "$id" | cut -d: -f2- | tr "," "\n")
         if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
-            log 'No dns change'
+            log 'No DNS change'
         else
             #statements
             for dns in $currentdnss; do
@@ -168,7 +168,7 @@ if [ "$reliablecount" -ge 2 ]; then
             done
             log "Updating $id"
             nmcli connection up "$id" >/dev/null
-            log 'Successful dns update'
+            log 'Successful DNS update'
         fi
       done
     else
@@ -176,15 +176,15 @@ if [ "$reliablecount" -ge 2 ]; then
       touch "$resolvconf"
       currentdnss=$(grep '^nameserver ' "$resolvconf" | cut -d' ' -f2)
       if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
-          log 'No dns change'
+          log 'No DNS change'
       else
         if [ -w "$resolvconf" ]; then
           log "Updating $resolvconf"
           otherlines=$(grep -v '^nameserver ' "$resolvconf")
           echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
-          log 'Successful dns update'
+          log 'Successful DNS update'
         else
-          warning "No write access to $resolvconf, no change"
+          warning "no write access to $resolvconf, no change"
         fi
       fi
     fi
