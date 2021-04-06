@@ -63,7 +63,7 @@ while getopts ":hvqf:" opt; do
     :)  echo "Missing option argument for -$OPTARG" >&2
         exit 1
         ;;
-    ?) echo "Invalid argument $OPTARG$" >&2
+    ?) echo "Invalid argument $OPTARG" >&2
        showhelp
        exit 1
        ;;
