@@ -42,7 +42,7 @@ warning() {
 }
 
 apicurl() {
-  curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$1"  
+  curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$1"
 }
 
 check_command() {
@@ -111,7 +111,7 @@ log "Using $apiip as API host"
 if [ -n "$user" ] && [ -n "$auth" ]; then
   logn "Updating whitelist with IP for user: $user "
   wlapiip=${wlapiip:-"161.97.219.82"}
-  curl --silent --connect-timeout 60 --insecure "https://$wlapiip/ip/update/?user=$user&auth=$auth"
+  curl --silent --connect-timeout 60 --insecure "https://$wlapiip/ip/update/?user=$user&auth=$auth" >/dev/null
 fi
 
 # query the API: list format, ipv4 only, 200 sites, no server admin sorting, including servers with blocklist and IP whitelisting
