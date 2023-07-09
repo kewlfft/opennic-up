@@ -1,27 +1,28 @@
 #!/bin/bash
-script="opennic-up"
-version="1.2"
-
-resolvconf="/etc/resolv.conf"
+readonly script="opennic-up"
+readonly version="1.2.1"
+readonly resolvconf="/etc/resolv.conf"
 usefile=0
 
 # pings run in parallel, send $1 pings to each target
 multiping() {
-  fping -q -p 400 -r 0 -c "$1" "${@:2}" 2>&1
+  fping -q -p 900 -r 0 -c "$1" "${@:2}" 2>&1
 }
 
 # dns lookup nameserver hostname
 dnslookup() {
-  drill A "$2" @"$1" | awk '$1 == "'"$2"'." && $3 == "IN" && $4 == "A" {print $5; exit}'
+  drill A "$2" @"$1" | awk -e '$1 == domain && $3 == "IN" && $4 == "A" {print $5; exit}' domain="$2"
 }
 
 showhelp() {
-    printf -- "usage:  %s [options]\n" "$script"
-    printf -- "options:\n"
-    printf -- "   -q         quiet, show less information\n"
-    printf -- "   -v         display version\n"
-    printf -- "   -h         help\n"
-    printf -- "   -f <file>  custom resolv.conf file\n"
+    cat << EOF
+usage: $script [options]
+options:
+   -q         quiet, show less information
+   -v         display version
+   -h         help
+   -f <file>  custom resolv.conf file
+EOF
 }
 
 log () {
@@ -71,12 +72,19 @@ while getopts ":hvqf:" opt; do
 done
 
 # check needed tools are present
-neededlist="awk sort curl fping drill"
-for needed in $neededlist; do
-  command -v "$needed" >/dev/null 2>&1 && continue
-  echo "$needed: is required but cannot be found in the environment path" >&2
-  exit 1
+required_tools=("awk" "sort" "curl" "fping" "drill")
+missing_tools=()
+
+for tool in "${required_tools[@]}"; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    missing_tools+=("$tool")
+  fi
 done
+
+if [ ${#missing_tools[@]} -gt 0 ]; then
+  echo "ERROR: The following tools are required but cannot be found in the environment path: ${missing_tools[*]}" >&2
+  exit 1
+fi
 
 # source opennic-up config
 configpathlist=(/etc ~/.config/opennic-up)
@@ -87,10 +95,11 @@ for p in "${configpathlist[@]}"; do
   fi
 done
 
-initdns=${initdns:-"185.121.177.177 169.239.202.202 172.98.193.42"}
+initdns=${initdns:-"192.3.165.37 147.182.243.49 137.184.12.79"}
 # retrieve first responding dns from initdns list
 log "Selecting DNS among $initdns..."
-respondingdns=$(multiping 2 $initdns | awk -F/ '$5 + 0.0 < 10' | awk '{print $1;exit}')
+respondingdns=$(multiping 2 $initdns | awk -F/ '$5 + 0.0 < 10 {print $1;exit}')
+
 if [ -z "$respondingdns" ]; then
   # none responding, network may be down, wait for first
   waitdns=$(echo "$initdns" | awk '{print $1}')
@@ -124,32 +133,32 @@ fi
 
 # filter hosts with more than 90% reliability
 myminreliability=${minreliability:-90}
-reliable=$(echo "$allhosts" | awk -F# '$3 + 0.0 > '"$myminreliability" | awk -F# '{print $1}')
+reliable=$(echo "$allhosts" | awk -F'#' -v minrel="$myminreliability" '$3 + 0.0 > minrel {print $1}')
 reliablecount=$(echo "$reliable" | wc -l)
 
 if [ "$reliablecount" -ge 2 ]; then
   #pinging the hosts
   logn "Pinging $reliablecount hosts to determine the top ones..."
-  pingresults=$(multiping 20 $reliable)
+  pingresults=$(multiping 15 $reliable)
 
   # packet loss must be below 10%, then sort the servers by their average response time, eventually keep only the IP column
-  responsive=$(echo "$pingresults" | awk -F/ '$5 + 0.0 < 10' | sort -t/ -nk8 | awk '{print $1}')
-  responsivecount=$(echo "$responsive" | wc -l)
+  responsive=$(awk -F/ '$5 + 0.0 < 10' <<< "$pingresults" | sort -t/ -nk8 | awk '{print $1}')
+  responsivecount=$(wc -l <<< "$responsive")
   log "resulting in $responsivecount responsive hosts"
 
   mymaxretain=${maxretain:-3}
-  if [ "$responsivecount" -ge 2 ]; then
+  if (( responsivecount >= 2 )); then
     retain=$((mymaxretain > responsivecount ? responsivecount : mymaxretain))
 
     # we retain the top servers for our DNS
     log "Selected top $retain hosts:"
-    myhosts=$(echo "$responsive" | head -n $retain)
+    myhosts=$(head -n $retain <<< "$responsive")
     nameservers=""
     for dns in $myhosts; do
-      log "$(echo "$allhosts" | grep "$dns")"
-      nameservers=$nameservers"nameserver $dns"$'\n'
+      log "$(grep -F "$dns" <<< "$allhosts")"
+      nameservers+="nameserver $dns"$'\n'
     done
-    echo -n "$nameservers"
+    printf "%s" "$nameservers"
 
     if [ $usefile -eq 0 ] && command -v nmcli >/dev/null 2>&1; then
       # nmcli: replace with our DNS all active connections
