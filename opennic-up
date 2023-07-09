@@ -82,8 +82,7 @@ for needed in $neededlist; do
 done
 
 # source opennic-up config
-configpathlist=(/etc ~/.config/opennic-up)
-for p in "${configpathlist[@]}"; do
+for p in /etc ~/.config/opennic-up; do
   configfile=$p/opennic-up.conf
   if [ -r "$configfile" ]; then
     . "$configfile"
