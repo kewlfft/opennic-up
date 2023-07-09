@@ -93,8 +93,8 @@ done
 initdns=${initdns:-"192.3.165.37 147.182.243.49 137.184.12.79"}
 # retrieve first responding dns from initdns list
 log "Selecting DNS among $initdns..."
-respondingdns=$(multiping 2 $initdns | awk -F/ '$5 + 0.0 < 10 {print $1;exit}')
-
+respondingdns=$(multiping 2 $initdns | awk -F/ '$5 + 0.0 < 10' | awk '{print $1;exit}')
+echo $respondingdns
 if [ -z "$respondingdns" ]; then
   # none responding, network may be down, wait for first
   waitdns=$(echo "$initdns" | awk '{print $1}')
