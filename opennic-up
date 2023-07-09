@@ -26,11 +26,11 @@ EOF
 }
 
 log () {
-    if [ "$quiet" -eq 0 ]; then echo "$@" >&2; fi
+    [ "$quiet" -eq 0 ] && echo "$@" >&2
 }
 
 logn () {
-    if [ "$quiet" -eq 0 ]; then echo -n "$@" >&2; fi
+    [ "$quiet" -eq 0 ] && echo "$@" >&2
 }
 
 error() {
