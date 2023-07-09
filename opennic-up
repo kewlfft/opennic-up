@@ -76,8 +76,7 @@ while getopts ":hvqf:" opt; do
 done
 
 # check needed tools are present
-neededlist="awk sort curl fping drill"
-for needed in $neededlist; do
+for needed in awk sort curl fping drill; do
   check_command "$needed"
 done
 
