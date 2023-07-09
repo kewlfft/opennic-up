@@ -1,6 +1,6 @@
 #!/bin/bash
 readonly script="opennic-up"
-readonly version="1.2.1"
+readonly version="1.2.2"
 readonly resolvconf="/etc/resolv.conf"
 usefile=0
 
@@ -30,11 +30,12 @@ log () {
 }
 
 logn () {
-    [ "$quiet" -eq 0 ] && echo "$@" >&2
+    [ "$quiet" -eq 0 ] && echo -n "$@" >&2
 }
 
 error() {
   printf "ERROR: %s\n" "$1" >&2
+  exit 1
 }
 
 warning() {
@@ -83,9 +84,7 @@ done
 # source opennic-up config
 for p in /etc ~/.config/opennic-up; do
   configfile=$p/opennic-up.conf
-  if [ -r "$configfile" ]; then
-    . "$configfile"
-  fi
+  [ -r "$configfile" ] && . "$configfile"
 done
 
 initdns=${initdns:-"192.3.165.37 147.182.243.49 137.184.12.79"}
@@ -97,7 +96,7 @@ if [ -z "$respondingdns" ]; then
   # none responding, network may be down, wait for first
   waitdns=$(echo "$initdns" | awk '{print $1}')
   log "Waiting for $waitdns..."
-  if fping -q -r 10 "$waitdns"; then respondingdns="$waitdns"; fi
+  fping -q -r 10 "$waitdns" && respondingdns="$waitdns"
 fi
 apihost=${apihost:-"api.opennicproject.org"}
 if [ -n "$respondingdns" ]; then
@@ -119,83 +118,72 @@ apiurl="https://$apihost/geoip/?list&ipv=4&res=200&adm=0&bl&wl"
 log "$apiurl"
 allhosts=$(apicurl "$apiurl")
 
-if [ -z "$allhosts" ]; then
-  error 'API not available'
-  exit 1
-fi
+[ -z "$allhosts" ] && error 'API not available'
 
 # filter hosts with more than 90% reliability
 myminreliability=${minreliability:-90}
-reliable=$(echo "$allhosts" | awk -F'#' -v minrel="$myminreliability" '$3 + 0.0 > minrel {print $1}')
-reliablecount=$(echo "$reliable" | wc -l)
+reliable=$(awk -F'#' -v minrel="$myminreliability" '$3 + 0.0 > minrel {print $1}' <<< "$allhosts")
+reliablecount=$(wc -l <<< "$reliable")
 
-if [ "$reliablecount" -ge 2 ]; then
-  #pinging the hosts
-  logn "Pinging $reliablecount hosts to determine the top ones..."
-  pingresults=$(multiping 15 $reliable)
+[ "$reliablecount" -lt 2 ] && error 'not enough OpenNIC servers available'
 
-  # packet loss must be below 10%, then sort the servers by their average response time, eventually keep only the IP column
-  responsive=$(awk -F/ '$5 + 0.0 < 10' <<< "$pingresults" | sort -t/ -nk8 | awk '{print $1}')
-  responsivecount=$(wc -l <<< "$responsive")
-  log "resulting in $responsivecount responsive hosts"
+#pinging the hosts
+logn "Pinging $reliablecount hosts to determine the top ones..."
+pingresults=$(multiping 15 $reliable)
 
-  mymaxretain=${maxretain:-3}
-  if (( responsivecount >= 2 )); then
-    retain=$((mymaxretain > responsivecount ? responsivecount : mymaxretain))
+# packet loss must be below 10%, then sort the servers by their average response time, eventually keep only the IP column
+responsive=$(awk -F/ '$5 + 0.0 < 10' <<< "$pingresults" | sort -t/ -nk8 | awk '{print $1}')
+responsivecount=$(wc -l <<< "$responsive")
+log "resulting in $responsivecount responsive hosts"
 
-    # we retain the top servers for our DNS
-    log "Selected top $retain hosts:"
-    myhosts=$(head -n $retain <<< "$responsive")
-    nameservers=""
-    for dns in $myhosts; do
-      log "$(grep -F "$dns" <<< "$allhosts")"
-      nameservers+="nameserver $dns"$'\n'
-    done
-    printf "%s" "$nameservers"
+mymaxretain=${maxretain:-3}
+[ "$responsivecount" -lt 2 ] && error 'not enough responsive OpenNIC servers available'
+retain=$((mymaxretain > responsivecount ? responsivecount : mymaxretain))
 
-    if [ $usefile -eq 0 ] && command -v nmcli >/dev/null 2>&1; then
-      # nmcli: replace with our DNS all active connections
-      for id in $(nmcli -terse -fields UUID connection show --active); do
-        currentdnss=$(nmcli -terse -fields ipv4.dns connection show "$id" | cut -d: -f2- | tr "," "\n")
-        if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
-            log 'No DNS change'
-        else
-            #statements
-            for dns in $currentdnss; do
-              nmcli connection modify "$id" -ipv4.dns "$dns"
-            done
+# we retain the top servers for our DNS
+log "Selected top $retain hosts:"
+myhosts=$(head -n $retain <<< "$responsive")
+nameservers=""
+for dns in $myhosts; do
+  log "$(grep -F "$dns" <<< "$allhosts")"
+  nameservers+="nameserver $dns"$'\n'
+done
+printf "%s" "$nameservers"
 
-            for dns in $myhosts; do
-              nmcli connection modify "$id" +ipv4.dns "$dns"
-            done
-            log "Updating $id"
-            nmcli connection up "$id" >/dev/null
-            log 'Successful DNS update'
-        fi
-      done
+if [ $usefile -eq 0 ] && command -v nmcli >/dev/null 2>&1; then
+  # nmcli: replace with our DNS all active connections
+  for id in $(nmcli -terse -fields UUID connection show --active); do
+    currentdnss=$(nmcli -terse -fields ipv4.dns connection show "$id" | cut -d: -f2- | tr "," "\n")
+    if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
+        log 'No DNS change'
     else
-      # resolv.conf
-      touch "$resolvconf"
-      currentdnss=$(grep '^nameserver ' "$resolvconf" | cut -d' ' -f2)
-      if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
-          log 'No DNS change'
-      else
-        if [ -w "$resolvconf" ]; then
-          log "Updating $resolvconf"
-          otherlines=$(grep -v '^nameserver ' "$resolvconf")
-          echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
-          log 'Successful DNS update'
-        else
-          warning "no write access to '$resolvconf', no change"
-        fi
-      fi
-    fi
-  else
-    error 'not enough responsive OpenNIC servers available'
-    exit 1
-  fi
-else
-  error 'not enough OpenNIC servers available'
-  exit 1
-fi
+        #statements
+        for dns in $currentdnss; do
+          nmcli connection modify "$id" -ipv4.dns "$dns"
+        done
 
+        for dns in $myhosts; do
+          nmcli connection modify "$id" +ipv4.dns "$dns"
+        done
+        log "Updating $id"
+        nmcli connection up "$id" >/dev/null
+        log 'Successful DNS update'
+    fi
+  done
+else
+  # resolv.conf
+  touch "$resolvconf"
+  currentdnss=$(grep '^nameserver ' "$resolvconf" | cut -d' ' -f2)
+  if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
+      log 'No DNS change'
+  else
+    if [ -w "$resolvconf" ]; then
+      log "Updating $resolvconf"
+      otherlines=$(grep -v '^nameserver ' "$resolvconf")
+      echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
+      log 'Successful DNS update'
+    else
+      warning "no write access to '$resolvconf', no change"
+    fi
+  fi
+fi
