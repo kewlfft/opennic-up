@@ -45,6 +45,10 @@ apicurl() {
   curl --silent --connect-timeout 60 --resolve "$apihost:443:$apiip" "$1"  
 }
 
+check_command() {
+  command -v "$1" >/dev/null 2>&1 || error "$1: is required but cannot be found in the environment path"
+}
+
 # arguments handling
 quiet=0
 while getopts ":hvqf:" opt; do
@@ -72,19 +76,10 @@ while getopts ":hvqf:" opt; do
 done
 
 # check needed tools are present
-required_tools=("awk" "sort" "curl" "fping" "drill")
-missing_tools=()
-
-for tool in "${required_tools[@]}"; do
-  if ! command -v "$tool" >/dev/null 2>&1; then
-    missing_tools+=("$tool")
-  fi
+neededlist="awk sort curl fping drill"
+for needed in $neededlist; do
+  check_command "$needed"
 done
-
-if [ ${#missing_tools[@]} -gt 0 ]; then
-  echo "ERROR: The following tools are required but cannot be found in the environment path: ${missing_tools[*]}" >&2
-  exit 1
-fi
 
 # source opennic-up config
 configpathlist=(/etc ~/.config/opennic-up)
