@@ -6,7 +6,7 @@ usefile=0
 
 # pings run in parallel, send $1 pings to each target
 multiping() {
-  fping -q -p 900 -r 0 -c "$1" "${@:2}" 2>&1
+  fping -q -p 1000 -r 0 -c "$1" "${@:2}" 2>&1
 }
 
 # dns lookup nameserver hostname
