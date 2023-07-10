@@ -1,6 +1,6 @@
 #!/bin/bash
 readonly script="opennic-up"
-readonly version="1.2.2"
+readonly version="1.2.3"
 readonly resolvconf="/etc/resolv.conf"
 usefile=0
 
@@ -137,7 +137,7 @@ responsivecount=$(wc -l <<< "$responsive")
 log "resulting in $responsivecount responsive hosts"
 
 mymaxretain=${maxretain:-3}
-[ "$responsivecount" -lt 2 ] && error 'not enough responsive OpenNIC servers available'
+[ "$responsivecount" -lt 1 ] && error 'not enough responsive OpenNIC servers available'
 retain=$((mymaxretain > responsivecount ? responsivecount : mymaxretain))
 
 # we retain the top servers for our DNS
@@ -183,7 +183,7 @@ else
       echo "$otherlines"$'\n'"$nameservers" > "$resolvconf"
       log 'Successful DNS update'
     else
-      warning "no write access to '$resolvconf', no change"
+      warning "No write access to '$resolvconf', no change"
     fi
   fi
 fi
