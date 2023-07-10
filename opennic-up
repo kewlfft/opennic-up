@@ -1,6 +1,5 @@
 #!/bin/bash
-readonly script="opennic-up"
-readonly version="1.2.3"
+readonly script="opennic-up" version="1.2.3"
 readonly resolvconf="/etc/resolv.conf"
 usefile=0
 
@@ -91,7 +90,7 @@ initdns=${initdns:-"192.3.165.37 147.182.243.49 137.184.12.79"}
 # retrieve first responding dns from initdns list
 log "Selecting DNS among $initdns..."
 respondingdns=$(multiping 2 $initdns | awk -F/ '$5 + 0.0 < 10' | awk '{print $1;exit}')
-echo $respondingdns
+echo "$respondingdns"
 if [ -z "$respondingdns" ]; then
   # none responding, network may be down, wait for first
   waitdns=$(echo "$initdns" | awk '{print $1}')
@@ -157,7 +156,6 @@ if [ $usefile -eq 0 ] && command -v nmcli >/dev/null 2>&1; then
     if [ "$(echo "$currentdnss" | sort)" == "$(echo "$myhosts" | sort)" ]; then
         log 'No DNS change'
     else
-        #statements
         for dns in $currentdnss; do
           nmcli connection modify "$id" -ipv4.dns "$dns"
         done
