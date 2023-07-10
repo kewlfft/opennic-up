@@ -125,7 +125,7 @@ myminreliability=${minreliability:-90}
 reliable=$(awk -F'#' -v minrel="$myminreliability" '$3 + 0.0 > minrel {print $1}' <<< "$allhosts")
 reliablecount=$(wc -l <<< "$reliable")
 
-[ "$reliablecount" -lt 2 ] && error 'not enough OpenNIC servers available'
+[ "$reliablecount" -lt 1 ] && error 'Not enough OpenNIC servers available'
 
 #pinging the hosts
 logn "Pinging $reliablecount hosts to determine the top ones..."
@@ -137,7 +137,7 @@ responsivecount=$(wc -l <<< "$responsive")
 log "resulting in $responsivecount responsive hosts"
 
 mymaxretain=${maxretain:-3}
-[ "$responsivecount" -lt 1 ] && error 'not enough responsive OpenNIC servers available'
+[ "$responsivecount" -lt 1 ] && error 'Not enough responsive OpenNIC servers available'
 retain=$((mymaxretain > responsivecount ? responsivecount : mymaxretain))
 
 # we retain the top servers for our DNS
