@@ -1,6 +1,6 @@
 #!/bin/bash
-readonly script="opennic-up" version="1.2.3"
-readonly resolvconf="/etc/resolv.conf"
+readonly script="opennic-up" version="1.2.4"
+resolvconf="/etc/resolv.conf"
 usefile=0
 
 # pings run in parallel, send $1 pings to each target
